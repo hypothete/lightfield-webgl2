@@ -19,8 +19,8 @@ let textureList; // populated from textures.txt
 const cameraData = [];
 const camsX = 17;
 const camsY = 17;
-const resX = 1024;
-const resY = 1024;
+const resX = 256;
+const resY = 256;
 const camInterval = 0.08; // cm hardcoded for now
 
 const helper = new THREE.AxesHelper(0.1);
