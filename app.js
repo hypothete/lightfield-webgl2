@@ -14,7 +14,7 @@ scene.add(camera);
 
 let fieldTexture;
 let plane, planeMat;
-let uvZ = 1; // Z position of the UV plane
+let uvZ = -1; // Z position of the UV plane
 let textureList; // populated from textures.txt
 const cameraData = [];
 const camsX = 17;
@@ -27,6 +27,7 @@ const helper = new THREE.AxesHelper(0.1);
 scene.add(helper);
 
 const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
 
 window.addEventListener('resize', () => {
   width = window.innerWidth;
