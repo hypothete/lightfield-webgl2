@@ -14,13 +14,13 @@
     uniform float uvZ;
 
     void main() {
-      vec3 posToCam =  position - cameraPosition;
+      vec3 posToCam = cameraPosition - position;
       vec3 nDir = normalize(posToCam);
       // given similar triangles we can project the focusing plane point
       float zRatio = (posToCam.z + uvZ) / nDir.z;
       vec3 uvPoint = zRatio * nDir;
       // offset the uv into 0-1.0 coords
-      vUv = uvPoint.xy + vec2(0.5);
+      vUv = uvPoint.xy + 0.5;
       vSt = uv;
       gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
     }
@@ -42,8 +42,9 @@
       float camOff = camX + camArraySize.x * camY;
       if (vUv.x >= 0.0 && vUv.x < 1.0 && vUv.y >= 0.0 && vUv.y < 1.0) {
         color = texture(field, vec3(vUv, camOff ));
+        color += 0.1 * vec4(vUv, 0.0, 1.0);
       } else {
-        color = vec4(1.0,0.0,0.0,1.0);
+        color = vec4(camX / 16.0,camY / 16.0,1.0,1.0);
       }
       gl_FragColor = vec4(color.rgb, 1.0);
     }

@@ -1,15 +1,15 @@
 import * as THREE from './node_modules/three/build/three.module.js';
+import { OrbitControls } from './vendor/OrbitControls.js';
 
 const scene = new THREE.Scene();
 let width = window.innerWidth;
 let height = window.innerHeight;
-const camera = new THREE.PerspectiveCamera(90, width/height, 0.1, 100);
+const camera = new THREE.PerspectiveCamera(45, width/height, 0.1, 100);
 const renderer = new THREE.WebGLRenderer();
 
 renderer.setSize(width, height);
 document.body.appendChild(renderer.domElement);
-camera.rotation.y = Math.PI;
-camera.position.z = -3;
+camera.position.z = 2;
 scene.add(camera);
 
 let fieldTexture;
@@ -23,8 +23,10 @@ const resX = 1024;
 const resY = 1024;
 const camInterval = 0.08; // cm hardcoded for now
 
-const gridHelper = new THREE.GridHelper(1,17);
-scene.add(gridHelper);
+const helper = new THREE.AxesHelper(0.1);
+scene.add(helper);
+
+const controls = new OrbitControls(camera, renderer.domElement);
 
 window.addEventListener('resize', () => {
   width = window.innerWidth;
@@ -35,31 +37,16 @@ window.addEventListener('resize', () => {
   renderer.render(scene, camera);
 });
 
-window.addEventListener('wheel', (e) => {
-  uvZ += e.deltaY / (Math.abs(e.deltaY) * 10);
-  planeMat.uniforms.uvZ.value = uvZ;
-});
-
 window.addEventListener('keydown', (e) => {
   const dMove = 0.01;
   switch(e.key) {
-    case 'a':
-      camera.position.x -= dMove;
-      break;
-    case 'd':
-      camera.position.x += dMove;
-      break;
     case 'w':
-      camera.position.z += dMove;
+      uvZ -= dMove;
+      planeMat.uniforms.uvZ.value = uvZ;
       break;
     case 's':
-      camera.position.z -= dMove;
-      break;
-    case 'Shift':
-      camera.position.y += dMove;
-      break;
-    case ' ':
-      camera.position.y -= dMove;
+      uvZ += dMove;
+      planeMat.uniforms.uvZ.value = uvZ;
       break;
     default:
   }
@@ -69,6 +56,7 @@ loadScene();
 
 function animate() {
 	requestAnimationFrame(animate);
+  controls.update();
 	renderer.render(scene, camera);
 
 }
@@ -102,11 +90,11 @@ function imgToRGBABuffer(img,w,h) {
   const ctx =  can.getContext('2d');
   can.width = w;
   can.height = h;
-  ctx.save();
-  ctx.translate(0,h);
-  ctx.scale(1,-1);
+  // ctx.save();
+  // ctx.translate(0,h);
+  // ctx.scale(1,-1);
   ctx.drawImage(img,0,0);
-  ctx.restore();
+  // ctx.restore();
   const imgData = ctx.getImageData(0,0,w,h);
   return imgData.data;
 }
@@ -142,6 +130,5 @@ function loadPlane() {
   });
   plane = new THREE.Mesh(planeGeo, planeMat);
   scene.add(plane);
-  plane.rotation.y = Math.PI;
   console.log('Loaded plane.');
 }
