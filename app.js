@@ -15,9 +15,7 @@ scene.add(camera);
 
 let fieldTexture;
 let plane, planeMat;
-let uvZ = -1; // Z position of the UV plane
 let textureList; // populated from textures.txt
-const cameraData = [];
 const camsX = 17;
 const camsY = 17;
 const resX = 256;
@@ -37,21 +35,6 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(width, height);
   renderer.render(scene, camera);
-});
-
-window.addEventListener('keydown', (e) => {
-  const dMove = 0.01;
-  switch(e.key) {
-    case 'w':
-      uvZ -= dMove;
-      planeMat.uniforms.uvZ.value = uvZ;
-      break;
-    case 's':
-      uvZ += dMove;
-      planeMat.uniforms.uvZ.value = uvZ;
-      break;
-    default:
-  }
 });
 
 loadScene();
@@ -83,18 +66,6 @@ async function loadTextureList() {
   console.log('Loaded texture list')
 }
 
-function addCameraData(filename) {
-  // out_00_00_-230.697815_929.138916_.png
-  const dataStr = filename.split('_');
-  const datum = {
-    x: Number(dataStr[1]),
-    y: Number(dataStr[2]),
-    dx: Number(dataStr[3]),
-    dy: Number(dataStr[4]),
-  };
-  cameraData.push(datum);
-}
-
 function imgToRGBABuffer(img,w,h) {
   const can = document.createElement('canvas');
   const ctx =  can.getContext('2d');
@@ -108,7 +79,6 @@ function imgToRGBABuffer(img,w,h) {
 async function loadField() {
   const textureLoader = new THREE.TextureLoader();
   const bufferTx = await Promise.all(textureList.map(async filename => {
-    addCameraData(filename);
     const loadedTx = await textureLoader.loadAsync(`./data/${filename}`);
     return imgToRGBABuffer(loadedTx.image, resX, resY);
   }));
@@ -128,7 +98,6 @@ function loadPlane() {
   planeMat = new THREE.ShaderMaterial({
     uniforms: {
       field: { value: fieldTexture },
-      uvZ: { value: uvZ },
       camArraySize: new THREE.Uniform(new THREE.Vector2(camsX, camsY))
     },
     vertexShader,

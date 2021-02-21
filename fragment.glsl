@@ -15,7 +15,6 @@ void main() {
     float camY = floor((vSt.y) * (camArraySize.y - 1.0));
     float camOff = camX + camArraySize.x * camY;
     color = texture(field, vec3(vUv, camOff));
-    //color += 0.1 * vec4(vUv, 0.0, 1.0);
   } else {
     color = vec4(0.0,0.0,1.0,1.0);
   }
