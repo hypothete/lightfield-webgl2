@@ -36,10 +36,15 @@
     in vec2 vUv;
 
     void main() {
+      vec4 color = vec4(0.0);
       float camX = floor(vSt.x * (camArraySize.x - 1.0));
       float camY = floor(vSt.y * (camArraySize.y - 1.0));
       float camOff = camX + camArraySize.x * camY;
-      vec4 color = texture(field, vec3(vUv, camOff ));
+      if (vUv.x >= 0.0 && vUv.x < 1.0 && vUv.y >= 0.0 && vUv.y < 1.0) {
+        color = texture(field, vec3(vUv, camOff ));
+      } else {
+        color = vec4(1.0,0.0,0.0,1.0);
+      }
       gl_FragColor = vec4(color.rgb, 1.0);
     }
   </script>

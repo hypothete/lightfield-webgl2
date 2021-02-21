@@ -3,9 +3,8 @@ import * as THREE from './node_modules/three/build/three.module.js';
 const scene = new THREE.Scene();
 let width = window.innerWidth;
 let height = window.innerHeight;
-const camera = new THREE.PerspectiveCamera(45, width/height, 1, 1000);
+const camera = new THREE.PerspectiveCamera(90, width/height, 0.1, 100);
 const renderer = new THREE.WebGLRenderer();
-
 
 renderer.setSize(width, height);
 document.body.appendChild(renderer.domElement);
@@ -23,6 +22,9 @@ const camsY = 17;
 const resX = 1024;
 const resY = 1024;
 const camInterval = 0.08; // cm hardcoded for now
+
+const gridHelper = new THREE.GridHelper(1,17);
+scene.add(gridHelper);
 
 window.addEventListener('resize', () => {
   width = window.innerWidth;
