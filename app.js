@@ -1,12 +1,11 @@
 import * as THREE from './node_modules/three/build/three.module.js';
 
-import textureList from './textures.js';
-
 const scene = new THREE.Scene();
 let width = window.innerWidth;
 let height = window.innerHeight;
 const camera = new THREE.PerspectiveCamera(45, width/height, 1, 1000);
 const renderer = new THREE.WebGLRenderer();
+
 
 renderer.setSize(width, height);
 document.body.appendChild(renderer.domElement);
@@ -16,8 +15,8 @@ scene.add(camera);
 
 let fieldTexture;
 let plane, planeMat;
-let focusingPlane = 1;
-const virtualCam = new THREE.Vector3(0,0,-1);
+let uvZ = 1; // Z position of the UV plane
+let textureList; // populated from textures.txt
 const cameraData = [];
 const camsX = 17;
 const camsY = 17;
@@ -35,24 +34,31 @@ window.addEventListener('resize', () => {
 });
 
 window.addEventListener('wheel', (e) => {
-  focusingPlane += e.deltaY / (Math.abs(e.deltaY) * 10);
-  planeMat.uniforms.focusingPlane.value = focusingPlane;
+  uvZ += e.deltaY / (Math.abs(e.deltaY) * 10);
+  planeMat.uniforms.uvZ.value = uvZ;
 });
 
 window.addEventListener('keydown', (e) => {
   const dMove = 0.01;
   switch(e.key) {
-    case 'ArrowLeft':
-      virtualCam.x -= dMove;
+    case 'a':
+      camera.position.x -= dMove;
       break;
-    case 'ArrowRight':
-      virtualCam.x += dMove;
+    case 'd':
+      camera.position.x += dMove;
       break;
-    case 'ArrowUp':
-      virtualCam.y += dMove;
+    case 'w':
+      camera.position.z += dMove;
       break;
-    case 'ArrowDown':
-      virtualCam.y -= dMove;
+    case 's':
+      camera.position.z -= dMove;
+      break;
+    case 'Shift':
+      camera.position.y += dMove;
+      break;
+    case ' ':
+      camera.position.y -= dMove;
+      break;
     default:
   }
 });
@@ -60,15 +66,21 @@ window.addEventListener('keydown', (e) => {
 loadScene();
 
 function animate() {
-	requestAnimationFrame( animate );
-	renderer.render( scene, camera );
+	requestAnimationFrame(animate);
+	renderer.render(scene, camera);
 
 }
 
 async function loadScene() {
+  await loadTextureList();
   await loadField();
   loadPlane();
   animate();
+}
+
+async function loadTextureList() {
+  const list = await fetch('./textures.txt').then(res => res.text());
+  textureList = list.split('\n').filter(line => line.length);
 }
 
 function addCameraData(filename) {
@@ -120,8 +132,7 @@ function loadPlane() {
   planeMat = new THREE.ShaderMaterial({
     uniforms: {
       field: { value: fieldTexture },
-      virtualCam: new THREE.Uniform(virtualCam),
-      focusingPlane: { value: focusingPlane },
+      uvZ: { value: uvZ },
       camArraySize: new THREE.Uniform(new THREE.Vector2(camsX, camsY))
     },
     vertexShader: document.querySelector('script[type="x-shader/x-vertex"]').textContent,

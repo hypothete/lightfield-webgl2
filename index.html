@@ -11,15 +11,16 @@
   <script type='x-shader/x-vertex'>
     out vec2 vSt;
     out vec2 vUv;
-    uniform float focusingPlane;
-    uniform vec3 virtualCam;
+    uniform float uvZ;
 
     void main() {
-      vec3 posToCam =  position - virtualCam + vec3(0.0, 0.0, focusingPlane);
+      vec3 posToCam =  position - cameraPosition;
       vec3 nDir = normalize(posToCam);
-      float zRatio = (position.z + focusingPlane) / nDir.z;
-      vec3 nPoint = zRatio * nDir;
-      vUv = nPoint.xy + vec2(0.5);
+      // given similar triangles we can project the focusing plane point
+      float zRatio = (posToCam.z + uvZ) / nDir.z;
+      vec3 uvPoint = zRatio * nDir;
+      // offset the uv into 0-1.0 coords
+      vUv = uvPoint.xy + vec2(0.5);
       vSt = uv;
       gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
     }
@@ -38,7 +39,7 @@
       float camX = floor(vSt.x * (camArraySize.x - 1.0));
       float camY = floor(vSt.y * (camArraySize.y - 1.0));
       float camOff = camX + camArraySize.x * camY;
-      vec4 color = texture(field, vec3( vUv, camOff ) );
+      vec4 color = texture(field, vec3(vUv, camOff ));
       gl_FragColor = vec4(color.rgb, 1.0);
     }
   </script>
