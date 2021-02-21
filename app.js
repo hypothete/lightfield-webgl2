@@ -6,6 +6,7 @@ let width = window.innerWidth;
 let height = window.innerHeight;
 const camera = new THREE.PerspectiveCamera(45, width/height, 0.1, 100);
 const renderer = new THREE.WebGLRenderer();
+let fragmentShader, vertexShader;
 
 renderer.setSize(width, height);
 document.body.appendChild(renderer.domElement);
@@ -64,14 +65,22 @@ function animate() {
 
 async function loadScene() {
   await loadTextureList();
+  await loadShaders();
   await loadField();
   loadPlane();
   animate();
 }
 
+async function loadShaders() {
+  vertexShader = await fetch('./vertex.glsl').then(res => res.text());
+  fragmentShader = await fetch('./fragment.glsl').then(res => res.text());
+  console.log('Loaded shaders');
+}
+
 async function loadTextureList() {
   const list = await fetch('./textures.txt').then(res => res.text());
   textureList = list.split('\n').filter(line => line.length);
+  console.log('Loaded texture list')
 }
 
 function addCameraData(filename) {
@@ -91,11 +100,7 @@ function imgToRGBABuffer(img,w,h) {
   const ctx =  can.getContext('2d');
   can.width = w;
   can.height = h;
-  // ctx.save();
-  // ctx.translate(0,h);
-  // ctx.scale(1,-1);
   ctx.drawImage(img,0,0);
-  // ctx.restore();
   const imgData = ctx.getImageData(0,0,w,h);
   return imgData.data;
 }
@@ -115,7 +120,7 @@ async function loadField() {
     offset += buf.byteLength;
   });
   fieldTexture = new THREE.DataTexture2DArray(allBuffer, resX, resY, camsX * camsY);
-  console.log('Loaded field data.');
+  console.log('Loaded field data');
 }
 
 function loadPlane() {
@@ -126,10 +131,10 @@ function loadPlane() {
       uvZ: { value: uvZ },
       camArraySize: new THREE.Uniform(new THREE.Vector2(camsX, camsY))
     },
-    vertexShader: document.querySelector('script[type="x-shader/x-vertex"]').textContent,
-    fragmentShader: document.querySelector('script[type="x-shader/x-fragment"]').textContent,
+    vertexShader,
+    fragmentShader,
   });
   plane = new THREE.Mesh(planeGeo, planeMat);
   scene.add(plane);
-  console.log('Loaded plane.');
+  console.log('Loaded plane');
 }
