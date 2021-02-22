@@ -14,9 +14,7 @@ void main() {
     float camX = floor((vSt.x) * (camArraySize.x - 1.0));
     float camY = floor((vSt.y) * (camArraySize.y - 1.0));
     float camOff = camX + camArraySize.x * camY;
-    color = texture(field, vec3(vUv, camOff));
-  } else {
-    color = vec4(0.0,0.0,1.0,1.0);
+    color += texture(field, vec3(vUv, camOff));
   }
   
   gl_FragColor = vec4(color.rgb, 1.0);
