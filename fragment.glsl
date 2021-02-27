@@ -12,12 +12,9 @@ void main() {
 
   vec2 camScale = camArraySize - 1.0;
 
-  vec2 camFract = fract(vec2(
-    (vSt.x) * camScale.x,
-    (vSt.y) * camScale.y
-  ));
+  vec2 camFract = fract(vSt * camScale);
 
-  vec2 uvOffset = vec2(1.0 / camScale.x, 1.0 / camScale.y);
+  vec2 uvOffset = 1.0 / camScale;
 
   vec2 cUv = clamp(vUv, 0.0, 1.0);
   if (cUv == vUv) {
@@ -41,6 +38,8 @@ void main() {
     color = mix(mix(colA, colC, camFract.y), mix(colB, colD, camFract.y), camFract.x);
 
   }
+
+  // color.rgb = vec3(vUv, 0.0);
 
   gl_FragColor = vec4(color.rgb, 1.0);
 }

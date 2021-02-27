@@ -22,8 +22,8 @@ const resX = 256;
 const resY = 256;
 const camInterval = 0.08; // cm hardcoded for now
 
-// const helper = new THREE.AxesHelper(0.1);
-// scene.add(helper);
+const helper = new THREE.AxesHelper(0.1);
+scene.add(helper);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;

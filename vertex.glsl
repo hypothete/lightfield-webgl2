@@ -9,6 +9,8 @@ void main() {
   vec3 uvPoint = zRatio * nDir;
   // offset the uv into 0-1.0 coords
   vUv = uvPoint.xy + 0.5;
+  vUv.x = 1.0 - vUv.x; // why is this necessary?
   vSt = uv;
+  vSt.x = 1.0 - vSt.x;
   gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
 }
