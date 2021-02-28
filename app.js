@@ -27,8 +27,8 @@ const cameraGap = 0.08; // cm hardcoded for now
 let aperture = Number(apertureInput.value);
 let focus = Number(focusInput.value);
 
-const helper = new THREE.AxesHelper(0.1);
-scene.add(helper);
+// const helper = new THREE.AxesHelper(0.1);
+// scene.add(helper);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;

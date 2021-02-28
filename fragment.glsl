@@ -18,17 +18,17 @@ void main() {
 
   float cc = camArraySize.x * camArraySize.y; // exact exposure
 
-  vec2 camCenter = vSt;
-
   if (vUv.x >= 0.0 && vUv.x <= 1.0 && vUv.y >= 0.0 && vUv.y <= 1.0) {
 
     for (float i = 0.0; i < camArraySize.x; i++) {
       for (float j = 0.0; j < camArraySize.y; j++) {
-        float dx = i - (camCenter.x * camArraySize.x - 0.5);
-        float dy = j - (camCenter.y * camArraySize.y - 0.5);
-        if (dx * dx + dy * dy < aperture) {
+        float dx = i - (vSt.x * camArraySize.x - 0.5);
+        float dy = j - (vSt.y * camArraySize.y - 0.5);
+        float sqDist = dx * dx + dy * dy;
+        if (sqDist < aperture) {
           float camOff = i + camArraySize.x * j;
-          color += texture(field, vec3(vUv, camOff));
+          vec2 focOff = vec2(dx, dy) * focus;
+          color += texture(field, vec3(vUv + focOff, camOff));
           colorCount++;
         }
       }
