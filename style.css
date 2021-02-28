@@ -1,4 +1,25 @@
 body {
   overflow: hidden;
   margin: 0;
+  position: relative;
+}
+
+.controls {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  padding: 2rem;
+  color: #fff;
+  font-family: sans-serif;
+  max-width: 400px;
+  z-index: 2;
+}
+
+.controls div {
+  text-align: right;
+  margin-bottom: 1rem;
+}
+
+input[type=range] {
+  width: 200px;
 }

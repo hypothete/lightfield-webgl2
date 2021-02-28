@@ -1,6 +1,9 @@
 import * as THREE from './vendor/three.module.js';
 import { OrbitControls } from './vendor/OrbitControls.js';
 
+const apertureInput = document.querySelector('#aperture');
+const focusInput = document.querySelector('#focus');
+
 const scene = new THREE.Scene();
 let width = window.innerWidth;
 let height = window.innerHeight;
@@ -20,7 +23,9 @@ const camsX = 17;
 const camsY = 17;
 const resX = 256;
 const resY = 256;
-const camInterval = 0.08; // cm hardcoded for now
+const cameraGap = 0.08; // cm hardcoded for now
+let aperture = Number(apertureInput.value);
+let focus = Number(focusInput.value);
 
 const helper = new THREE.AxesHelper(0.1);
 scene.add(helper);
@@ -35,6 +40,16 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(width, height);
   renderer.render(scene, camera);
+});
+
+apertureInput.addEventListener('input', e => {
+  aperture = Number(apertureInput.value);
+  planeMat.uniforms.aperture.value = aperture;
+});
+
+focusInput.addEventListener('input', e => {
+  focus = Number(focusInput.value);
+  planeMat.uniforms.focus.value = focus;
 });
 
 loadScene();
@@ -71,7 +86,11 @@ function imgToRGBABuffer(img,w,h) {
   const ctx =  can.getContext('2d');
   can.width = w;
   can.height = h;
+  // ctx.save();
+  // ctx.translate(0,h);
+  // ctx.scale(1, -1);
   ctx.drawImage(img,0,0);
+  // ctx.restore();
   const imgData = ctx.getImageData(0,0,w,h);
   return imgData.data;
 }
@@ -94,11 +113,13 @@ async function loadField() {
 }
 
 function loadPlane() {
-  const planeGeo = new THREE.PlaneGeometry(camsX * camInterval, camsY * camInterval, camsX, camsY);
+  const planeGeo = new THREE.PlaneGeometry(camsX * cameraGap, camsY * cameraGap, camsX, camsY);
   planeMat = new THREE.ShaderMaterial({
     uniforms: {
       field: { value: fieldTexture },
-      camArraySize: new THREE.Uniform(new THREE.Vector2(camsX, camsY))
+      camArraySize: new THREE.Uniform(new THREE.Vector2(camsX, camsY)),
+      aperture: { value: aperture },
+      focus: { value: focus }
     },
     vertexShader,
     fragmentShader,
