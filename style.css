@@ -11,7 +11,7 @@ body {
   padding: 2rem;
   color: #fff;
   font-family: sans-serif;
-  max-width: 400px;
+  max-width: 280px;
   z-index: 2;
 }
 
@@ -22,4 +22,12 @@ body {
 
 input[type=range] {
   width: 200px;
+}
+
+a {
+  color: #999;
+}
+
+a:visted {
+  color: #666;
 }
