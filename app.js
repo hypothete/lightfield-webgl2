@@ -33,7 +33,7 @@ let focus = Number(focusInput.value);
 // scene.add(helper);
 
 const controls = new OrbitControls(camera, renderer.domElement);
-// controls.enableDamping = true;
+controls.enableDamping = true;
 controls.target = new THREE.Vector3(0,0,1);
 
 
