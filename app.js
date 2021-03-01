@@ -3,6 +3,7 @@ import { OrbitControls } from './vendor/OrbitControls.js';
 
 const apertureInput = document.querySelector('#aperture');
 const focusInput = document.querySelector('#focus');
+const stInput = document.querySelector('#stplane');
 
 const scene = new THREE.Scene();
 let width = window.innerWidth;
@@ -17,12 +18,12 @@ camera.position.z = 2;
 scene.add(camera);
 
 let fieldTexture;
-let plane, planeMat;
+let plane, planeMat, planePts;
 let textureList; // populated from textures.txt
 const camsX = 17;
 const camsY = 17;
-const resX = 256;
-const resY = 256;
+const resX = 1024;
+const resY = 1024;
 const cameraGap = 0.08; // cm hardcoded for now
 let aperture = Number(apertureInput.value);
 let focus = Number(focusInput.value);
@@ -31,7 +32,9 @@ let focus = Number(focusInput.value);
 // scene.add(helper);
 
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
+// controls.enableDamping = true;
+controls.target = new THREE.Vector3(0,0,1);
+
 
 window.addEventListener('resize', () => {
   width = window.innerWidth;
@@ -50,6 +53,10 @@ apertureInput.addEventListener('input', e => {
 focusInput.addEventListener('input', e => {
   focus = Number(focusInput.value);
   planeMat.uniforms.focus.value = focus;
+});
+
+stInput.addEventListener('input', () => {
+  planePts.visible = stInput.checked;
 });
 
 loadScene();
@@ -125,6 +132,10 @@ function loadPlane() {
     fragmentShader,
   });
   plane = new THREE.Mesh(planeGeo, planeMat);
+  const ptsMat = new THREE.PointsMaterial({ size: 0.01, color: 0xeeccff });
+  planePts = new THREE.Points(planeGeo, ptsMat);
+  planePts.visible = stInput.checked;
+  plane.add(planePts);
   scene.add(plane);
   console.log('Loaded plane');
 }
