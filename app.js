@@ -24,6 +24,7 @@ const camsX = 17;
 const camsY = 17;
 const resX = 256;
 const resY = 256;
+const srcFolder = 'data';
 const cameraGap = 0.08; // cm hardcoded for now
 let aperture = Number(apertureInput.value);
 let focus = Number(focusInput.value);
@@ -105,7 +106,7 @@ function imgToRGBABuffer(img,w,h) {
 async function loadField() {
   const textureLoader = new THREE.TextureLoader();
   const bufferTx = await Promise.all(textureList.map(async filename => {
-    const loadedTx = await textureLoader.loadAsync(`./data/${filename}`);
+    const loadedTx = await textureLoader.loadAsync(`./${srcFolder}/${filename}`);
     return imgToRGBABuffer(loadedTx.image, resX, resY);
   }));
   const totalBytes = bufferTx.reduce((acc, buf) => acc + buf.byteLength, 0);

@@ -10,6 +10,7 @@ body {
   right: 0;
   padding: 2rem;
   color: #fff;
+  text-shadow: 2px 2px 2px black;
   font-family: sans-serif;
   max-width: 280px;
   z-index: 2;
