@@ -4,6 +4,8 @@ import { OrbitControls } from './vendor/OrbitControls.js';
 const apertureInput = document.querySelector('#aperture');
 const focusInput = document.querySelector('#focus');
 const stInput = document.querySelector('#stplane');
+const loadWrap = document.querySelector('#load-wrap');
+const loadBtn = document.querySelector('#load');
 
 const scene = new THREE.Scene();
 let width = window.innerWidth;
@@ -19,12 +21,11 @@ scene.add(camera);
 
 let fieldTexture;
 let plane, planeMat, planePts;
-let textureList; // populated from textures.txt
+const filename = './frames.mp4';
 const camsX = 17;
 const camsY = 17;
-const resX = 256;
-const resY = 256;
-const srcFolder = 'data';
+const resX = 1024;
+const resY = 1024;
 const cameraGap = 0.08; // cm hardcoded for now
 let aperture = Number(apertureInput.value);
 let focus = Number(focusInput.value);
@@ -35,7 +36,7 @@ let focus = Number(focusInput.value);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.target = new THREE.Vector3(0,0,1);
-
+controls.panSpeed = 2;
 
 window.addEventListener('resize', () => {
   width = window.innerWidth;
@@ -60,19 +61,22 @@ stInput.addEventListener('input', () => {
   planePts.visible = stInput.checked;
 });
 
-loadScene();
+loadBtn.addEventListener('click', async () => {
+  loadBtn.setAttribute('disabled', true);
+  await loadScene();
+});
+
+
 
 function animate() {
 	requestAnimationFrame(animate);
   controls.update();
 	renderer.render(scene, camera);
-
 }
 
 async function loadScene() {
-  await loadTextureList();
   await loadShaders();
-  await loadField();
+  await extractVideo();
   loadPlane();
   animate();
 }
@@ -83,41 +87,59 @@ async function loadShaders() {
   console.log('Loaded shaders');
 }
 
-async function loadTextureList() {
-  const list = await fetch('./textures.txt').then(res => res.text());
-  textureList = list.split('\n').filter(line => line.length);
-  console.log('Loaded texture list')
-}
-
-function imgToRGBABuffer(img,w,h) {
-  const can = document.createElement('canvas');
-  const ctx =  can.getContext('2d');
-  can.width = w;
-  can.height = h;
-  // ctx.save();
-  // ctx.translate(0,h);
-  // ctx.scale(1, -1);
-  ctx.drawImage(img,0,0);
-  // ctx.restore();
-  const imgData = ctx.getImageData(0,0,w,h);
-  return imgData.data;
-}
-
-async function loadField() {
-  const textureLoader = new THREE.TextureLoader();
-  const bufferTx = await Promise.all(textureList.map(async filename => {
-    const loadedTx = await textureLoader.loadAsync(`./${srcFolder}/${filename}`);
-    return imgToRGBABuffer(loadedTx.image, resX, resY);
-  }));
-  const totalBytes = bufferTx.reduce((acc, buf) => acc + buf.byteLength, 0);
-  const allBuffer = new Uint8Array(totalBytes);
+async function extractVideo() {
+  // based on https://stackoverflow.com/questions/32699721/javascript-extract-video-frames-reliably
+  const video = document.createElement('video');
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = resX;
+  canvas.height = resY;
+  canvas.setAttribute('id', 'videosrc');
+  video.src = filename;
+  let seekResolve;
+  let count = 0;
   let offset = 0;
-  bufferTx.forEach(buf => {
-    allBuffer.set(buf, offset);
-    offset += buf.byteLength;
+  const allBuffer = new Uint8Array(resX * resY * 4 * camsX * camsY);
+
+  console.log('starting extraction');
+
+  const getBufferFromVideo = () => {
+    ctx.drawImage(video, 0, 0,resX, resY);
+    const imgData = ctx.getImageData(0,0,resX, resY);
+    allBuffer.set(imgData.data, offset);
+    offset += imgData.data.byteLength;
+    count++;
+    loadBtn.textContent = `Loaded frame ${count}`;
+  };
+
+  const fetchFrames = async () => {
+    let currentTime = 0;
+    
+    while (count < camsX * camsY) {
+      getBufferFromVideo();
+      currentTime += 0.0333;
+      video.currentTime = currentTime;
+      await new Promise(res => (seekResolve = res));
+    }
+
+    loadWrap.style.display = 'none';
+    
+    fieldTexture = new THREE.DataTexture2DArray(allBuffer, resX, resY, camsX * camsY);
+    console.log('Loaded field data');
+
+    planeMat.uniforms.field.value = fieldTexture;
+    fieldTexture.needsUpdate = true;
+  };
+
+  video.addEventListener('seeked', async function() {
+    if(seekResolve) seekResolve();
   });
-  fieldTexture = new THREE.DataTexture2DArray(allBuffer, resX, resY, camsX * camsY);
-  console.log('Loaded field data');
+
+
+  video.addEventListener('loadeddata', async () => {
+    await fetchFrames();
+    console.log('loaded data');
+  });
 }
 
 function loadPlane() {
