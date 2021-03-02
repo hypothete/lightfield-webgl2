@@ -109,7 +109,7 @@ async function extractVideo() {
     allBuffer.set(imgData.data, offset);
     offset += imgData.data.byteLength;
     count++;
-    loadBtn.textContent = `Loaded frame ${count}`;
+    loadBtn.textContent = `Loaded ${Math.round(100 * count / (camsX * camsY))}%`;
   };
 
   const fetchFrames = async () => {
