@@ -9,8 +9,7 @@
     "three": "^0.125.2"
   },
   "scripts": {
-    "start": "http-server",
-    "get-textures": "ls data > textures.txt"
+    "start": "http-server"
   },
   "devDependencies": {
     "http-server": "^0.12.3"
